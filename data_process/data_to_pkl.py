@@ -242,6 +242,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
     tra_gt = np.zeros([tra_num, 1], dtype=float)
     tra_dt = np.zeros([tra_num, 1], dtype=float)
     tra_tn = np.zeros([tra_num, 1], dtype=float)
+    tra_lb = np.zeros([tra_num, 1], dtype=float)
     tra_txt = np.ones([tra_num, 10, 40],dtype=float) * dict1["<pad>"]
     tra_txt_sc = np.zeros([tra_num,10], dtype=float)
     tra_scores_pad = np.zeros([tra_num,10,10], dtype=float)
@@ -251,6 +252,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
     val_gt = np.zeros([val_num, 1], dtype=float)
     val_dt = np.zeros([val_num, 1], dtype=float)
     val_tn = np.zeros([val_num, 1], dtype=float)
+    val_lb = np.zeros([val_num, 1], dtype=float)
     val_txt = np.ones([val_num, 10, 40], dtype=float) * dict1["<pad>"]
     val_txt_sc = np.zeros([val_num,10], dtype=float)
     val_scores_pad = np.zeros([val_num,10,10], dtype=float)
@@ -260,6 +262,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
     tes_gt = np.zeros([tes_num, 1], dtype=float)
     tes_dt = np.zeros([tes_num, 1], dtype=float)
     tes_tn = np.zeros([tes_num, 1], dtype=float)
+    tes_lb = np.zeros([tes_num, 1], dtype=float)
     tes_txt = np.ones([tes_num, 10, 40], dtype=float) * dict1["<pad>"]
     tes_txt_sc = np.zeros([tes_num, 10], dtype=float)
     tes_scores_pad = np.zeros([tes_num,10,10], dtype=float)
@@ -323,6 +326,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
                 tra_wd[count] = data_wd[date_ind - seq: date_ind, :]
                 tra_dt[count] = dates_index[key]
                 tra_tn[count] = comp_id[comp]
+                tra_lb[count] = 1
                 if dates_index[key] in all_text[comp_id[comp]]:
                     tra_txt[count] = np.array(all_text[comp_id[comp]][dates_index[key]],dtype=float)
                     # print(type(all_text_score[comp_id[comp]][dates_index[key]]),type(tra_txt_sc[count]))
@@ -352,6 +356,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
                 val_wd[count] = data_wd[date_ind - seq: date_ind, :]
                 val_dt[count] = dates_index[key]
                 val_tn[count] = comp_id[comp]
+                val_lb[count] = 1
                 if dates_index[key] in all_text[comp_id[comp]]:
                     val_txt[count] = np.array(all_text[comp_id[comp]][dates_index[key]],dtype=float)
                     val_txt_sc[count] = all_text_score[comp_id[comp]][dates_index[key]]
@@ -377,6 +382,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
                 tes_wd[count] = data_wd[date_ind - seq: date_ind, :]
                 tes_dt[count] = dates_index[key]
                 tes_tn[count] = comp_id[comp]
+                tes_lb[count] = 1
                 if dates_index[key] in all_text[comp_id[comp]]:
                     tes_txt[count] = np.array(all_text[comp_id[comp]][dates_index[key]],dtype=float)
                     tes_txt_sc[count] = all_text_score[comp_id[comp]][dates_index[key]]
@@ -387,7 +393,7 @@ def load_cmin_data(data_path, tra_date, val_date, tes_date, seq=5,
                     tes_scores_pad[count] = np.ones((10,10),dtype=float) * 0
 
 
-    return tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_txt, tes_txt_sc, tes_scores_pad
+    return tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_lb, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_lb, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_lb, tes_txt, tes_txt_sc, tes_scores_pad
 
 
 def load_time_data(data_path, tra_date, val_date, tes_date, seq=5,
@@ -440,9 +446,9 @@ def load_time_data(data_path, tra_date, val_date, tes_date, seq=5,
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
-                if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
-                    tra_num += 1
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tra_num += 1
     print(tra_num, ' training instances')
 
     # validation
@@ -451,9 +457,9 @@ def load_time_data(data_path, tra_date, val_date, tes_date, seq=5,
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
-                if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
-                    val_num += 1
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                val_num += 1
     print(val_num, ' validation instances')
 
     # testing
@@ -462,9 +468,9 @@ def load_time_data(data_path, tra_date, val_date, tes_date, seq=5,
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
-                if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
-                    tes_num += 1
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tes_num += 1
     print(tes_num, ' testing instances')
 
     # generate training, validation, and testing instances
@@ -472,55 +478,83 @@ def load_time_data(data_path, tra_date, val_date, tes_date, seq=5,
     tra_pv = np.zeros([tra_num, seq, fea_dim], dtype=float)
     tra_wd = np.zeros([tra_num, seq, 5], dtype=float)
     tra_gt = np.zeros([tra_num, 1], dtype=float)
+    tra_dt = np.zeros([tra_num, 1], dtype=float)
+    tra_tn = np.zeros([tra_num, 1], dtype=float)
+    tra_lb = np.zeros([tra_num, 1], dtype=float)
+
     ins_ind = 0
     for date_ind in range(tra_ind, val_ind):
         # filter out instances without length enough history
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8 and \
-                    data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
                 tra_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, : -2]
                 tra_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
-                tra_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                tra_dt[ins_ind, 0] = date_ind
+                tra_tn[ins_ind, 0] = tic_ind
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+                    tra_lb[ins_ind, 0] = 1 
+                    tra_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                else:
+                    tra_gt[ins_ind, 0] = 2
                 ins_ind += 1
 
     # validation
     val_pv = np.zeros([val_num, seq, fea_dim], dtype=float)
     val_wd = np.zeros([val_num, seq, 5], dtype=float)
     val_gt = np.zeros([val_num, 1], dtype=float)
+    val_dt = np.zeros([val_num, 1], dtype=float)
+    val_tn = np.zeros([val_num, 1], dtype=float)
+    val_lb = np.zeros([val_num, 1], dtype=float)
+
     ins_ind = 0
     for date_ind in range(val_ind, tes_ind):
         # filter out instances without length enough history
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8 and \
-                            data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
                 val_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, :-2]
                 val_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
-                val_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                val_dt[ins_ind, 0] = date_ind
+                val_tn[ins_ind, 0] = tic_ind
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:    
+                    val_lb[ins_ind, 0] = 1   
+                    val_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                else:
+                    val_gt[ins_ind, 0] = 2
                 ins_ind += 1
 
     # testing
     tes_pv = np.zeros([tes_num, seq, fea_dim], dtype=float)
     tes_wd = np.zeros([tes_num, seq, 5], dtype=float)
     tes_gt = np.zeros([tes_num, 1], dtype=float)
+    tes_dt = np.zeros([tes_num, 1], dtype=float)
+    tes_tn = np.zeros([tes_num, 1], dtype=float)
+    tes_lb = np.zeros([tes_num, 1], dtype=float)
+
+
     ins_ind = 0
     for date_ind in range(tes_ind, len(trading_dates)):
         # filter out instances without length enough history
         if date_ind < seq:
             continue
         for tic_ind in range(len(fnames)):
-            if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8 and \
-                            data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tes_dt[ins_ind, 0] = date_ind
+                tes_tn[ins_ind, 0] = tic_ind
                 tes_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, :-2]
                 # # for the momentum indicator
                 # tes_pv[ins_ind, -1, -1] = data_EOD[tic_ind][date_ind - 1, -1] - data_EOD[tic_ind][date_ind - 11, -1]
                 tes_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
-                tes_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+                    tes_lb[ins_ind, 0] = 1
+                    tes_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                else:
+                    tes_gt[ins_ind, 0] = 2
                 ins_ind += 1
-    return tra_pv, tra_wd, tra_gt, val_pv, val_wd, val_gt, tes_pv, tes_wd, tes_gt
+    return tra_pv, tra_wd, tra_gt, val_pv, val_wd, val_gt, tes_pv, tes_wd, tes_gt, tra_dt, val_dt, tes_dt, tra_tn, val_tn, tes_tn , tra_lb, val_lb, tes_lb
 def load_stocknet_data(data_path, tra_date, val_date, tes_date, seq=5,
                   date_format='%Y-%m-%d',dict = None):
     fnames = [fname for fname in os.listdir(data_path+"/price/preprocessed") if
@@ -774,8 +808,253 @@ def load_stocknet_data(data_path, tra_date, val_date, tes_date, seq=5,
 
 
     return tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_txt, tes_txt_sc, tes_scores_pad
-    
 
+def load_stocknet_data2(data_path, tra_date, val_date, tes_date, seq=5,
+                  date_format='%Y-%m-%d',dict = None): 
+    data_path1 = data_path+"/ourpped"
+    fnames = [fname for fname in os.listdir(data_path1) if
+              os.path.isfile(os.path.join(data_path1, fname))]
+    dict1 = pkl.load(open("./dict"+"/"+dict, "rb"))
+    print(len(fnames), ' tickers selected')
+
+    data_EOD = []
+    for index, fname in enumerate(fnames):
+        # print(fname)
+        single_EOD = np.genfromtxt(
+            os.path.join(data_path1, fname), dtype=float, delimiter=',',
+            skip_header=False
+        )
+        # print('data shape:', single_EOD.shape)
+        data_EOD.append(single_EOD)
+    fea_dim = data_EOD[0].shape[1] - 2
+
+    trading_dates = np.genfromtxt(
+        os.path.join(data_path1, '..', 'trading_dates.csv'), dtype=str,
+        delimiter=',', skip_header=False
+    )
+    print(len(trading_dates), 'trading dates:')
+
+   
+
+    # transform the trading dates into a dictionary with index, at the same
+    # time, transform the indices into a dictionary with weekdays
+    dates_index = {}
+    dates_dates = {}
+    comp_id = {}
+    # indices_weekday = {}
+    data_wd = np.zeros([len(trading_dates), 5], dtype=float)
+    wd_encodings = np.identity(5, dtype=float)
+    for index, date in enumerate(trading_dates):
+        dates_index[date] = index
+        dates_dates[index] = date
+        # indices_weekday[index] = datetime.strptime(date, date_format).weekday()
+        data_wd[index] = wd_encodings[datetime.strptime(date, date_format).weekday()]
+
+    tra_ind = dates_index[tra_date]
+    val_ind = dates_index[val_date]
+    tes_ind = dates_index[tes_date]
+    print(tra_ind, val_ind, tes_ind)
+
+    # count training, validation, and testing instances
+    tra_num = 0
+    val_num = 0
+    tes_num = 0
+    # training
+    for date_ind in range(tra_ind, val_ind):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tra_num += 1
+            comp_id[fnames[tic_ind].split(".csv")[0]] = tic_ind
+    print(tra_num, ' training instances')
+
+    # validation
+    for date_ind in range(val_ind, tes_ind):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                val_num += 1
+            comp_id[fnames[tic_ind].split(".csv")[0]] = tic_ind
+    print(val_num, ' validation instances')
+
+    # testing
+    for date_ind in range(tes_ind, len(trading_dates)):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            # if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tes_num += 1
+            comp_id[fnames[tic_ind].split(".csv")[0]] = tic_ind
+    print(tes_num, ' testing instances')
+
+    all_text = {}
+    all_text_score = {}
+    all_pad_score = {}
+    text_sc_data_all = _load_text_data2(data_path+"/score")
+    all_text_all = []
+
+    for comp in text_sc_data_all:
+        if comp not in all_text:
+            all_text[comp_id[comp]] = {}
+            all_text_score[comp_id[comp]] = {}
+            all_pad_score[comp_id[comp]] = {}
+        
+        for date in text_sc_data_all[comp]:
+            news_by_date = [b['News_content'] if 'News_content' in b else (b['orginal_text'] if 'orginal_text' in b else "") for b in text_sc_data_all[comp][date]["Each_item"]]
+            Correlation = [[b['Correlation']] if  'Correlation' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Sentiment = [[b['Sentiment']] if 'Sentiment' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Importance = [[b['Importance']] if 'Importance' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Impact = [[b['Impact']] if 'Impact' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Duration = [[b['Duration']] if 'Duration' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Entity_Density = [[b['Virality']] if 'Virality' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Market_Scope = [[b['Source_Score']] if 'Source_Score' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Time_Proximity = [[b['Specificity']] if 'Specificity' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Headline_Structure = [[b['Sector_Spread']] if 'Sector_Spread' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            Source_Recency = [[b['Tech_mentions']] if 'Tech_mentions' in b else [0.0] for b in text_sc_data_all[comp][date]["Each_item"]]
+            if len(news_by_date) == 0:
+                continue
+            if news_by_date is not None:
+                padded_text = [_tokenize_and_pad_text(new,dict1,mode = 'CN' if "CN" in data_path else "US") for new in news_by_date]
+                padded_text_pad = _pad_texts_to_equal_length(padded_text,dict1, max_docs = 10,max_seq_len = 40)
+            else:
+                padded_text = [_tokenize_and_pad_text("None",dict1,mode = 'CN' if "CN" in data_path else "US")]
+                padded_text_pad = _pad_texts_to_equal_length([[]], dict1, max_docs = 10,max_seq_len = 40)
+            
+            scores = [Correlation, Sentiment, Importance, Impact, Duration, Entity_Density, Market_Scope, Time_Proximity, Headline_Structure, Source_Recency]
+            scores = [[b[0] for b in sublist] for sublist in scores]
+            
+            score_avg = [[sum(b)/len(b) for b in scores]]
+            scores = list(map(list, zip(*scores)))
+            
+            scores_pad = _pad_texts_to_equal_length1(scores,  max_docs = 10,max_seq_len = 10)
+            # print(dates_index,date)
+            if date in dates_index:
+                all_text[comp_id[comp]][dates_index[date]] = np.array(padded_text_pad)
+                all_pad_score[comp_id[comp]][dates_index[date]] = np.array(scores_pad)
+                all_text_score[comp_id[comp]][dates_index[date]] = np.array(score_avg)
+    # generate training, validation, and testing instances
+    # training
+    tra_pv = np.zeros([tra_num, seq, fea_dim], dtype=float)
+    tra_wd = np.zeros([tra_num, seq, 5], dtype=float)
+    tra_gt = np.zeros([tra_num, 1], dtype=float)
+    tra_dt = np.zeros([tra_num, 1], dtype=float)
+    tra_tn = np.zeros([tra_num, 1], dtype=float)
+    tra_lb = np.zeros([tra_num, 1], dtype=float)
+    tra_txt = np.ones([tra_num, 10, 40],dtype=float) * dict1["<pad>"]
+    tra_txt_sc = np.zeros([tra_num,10], dtype=float)
+    tra_scores_pad = np.zeros([tra_num,10,10], dtype=float)
+
+    ins_ind = 0
+    for date_ind in range(tra_ind, val_ind):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tra_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, : -2]
+                tra_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
+                tra_dt[ins_ind, 0] = date_ind
+                tra_tn[ins_ind, 0] = tic_ind
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+                    tra_lb[ins_ind, 0] = 1 
+                    tra_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                    if date_ind in all_text[tic_ind]:
+                        tra_txt[ins_ind] = np.array(all_text[tic_ind][date_ind],dtype=float)
+                        tra_txt_sc[ins_ind] = all_text_score[tic_ind][date_ind]
+                        tra_scores_pad[ins_ind] = all_pad_score[tic_ind][date_ind]
+                    else:
+                        tra_txt[ins_ind] = np.ones((10,40),dtype=float) * dict1["<pad>"]
+                        tra_txt_sc[ins_ind] = np.zeros(10,dtype=float)
+                        tra_scores_pad[ins_ind] = np.ones((10,10),dtype=float) * 0
+                else:
+                    tra_gt[ins_ind, 0] = 2
+                ins_ind += 1
+
+    # validation
+    val_pv = np.zeros([val_num, seq, fea_dim], dtype=float)
+    val_wd = np.zeros([val_num, seq, 5], dtype=float)
+    val_gt = np.zeros([val_num, 1], dtype=float)
+    val_dt = np.zeros([val_num, 1], dtype=float)
+    val_tn = np.zeros([val_num, 1], dtype=float)
+    val_lb = np.zeros([val_num, 1], dtype=float)
+    val_txt = np.ones([val_num, 10, 40], dtype=float) * dict1["<pad>"]
+    val_txt_sc = np.zeros([val_num,10], dtype=float)
+    val_scores_pad = np.zeros([val_num,10,10], dtype=float)
+
+    ins_ind = 0
+    for date_ind in range(val_ind, tes_ind):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                val_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, :-2]
+                val_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
+                val_dt[ins_ind, 0] = date_ind
+                val_tn[ins_ind, 0] = tic_ind
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:    
+                    val_lb[ins_ind, 0] = 1   
+                    val_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                    if date_ind in all_text[tic_ind]:
+                        val_txt[ins_ind] = np.array(all_text[tic_ind][date_ind],dtype=float)
+                        val_txt_sc[ins_ind] = all_text_score[tic_ind][date_ind]
+                        val_scores_pad[ins_ind] = all_pad_score[tic_ind][date_ind]
+                    else:
+                        val_txt[ins_ind] = np.ones((10,40),dtype=float) * dict1["<pad>"]
+                        val_txt_sc[ins_ind] = np.zeros(10,dtype=float)
+                        val_scores_pad[ins_ind] = np.ones((10,10),dtype=float) * 0
+                else:
+                    val_gt[ins_ind, 0] = 2
+                ins_ind += 1
+
+    # testing
+    tes_pv = np.zeros([tes_num, seq, fea_dim], dtype=float)
+    tes_wd = np.zeros([tes_num, seq, 5], dtype=float)
+    tes_gt = np.zeros([tes_num, 1], dtype=float)
+    tes_dt = np.zeros([tes_num, 1], dtype=float)
+    tes_tn = np.zeros([tes_num, 1], dtype=float)
+    tes_lb = np.zeros([tes_num, 1], dtype=float)
+    tes_txt = np.ones([tes_num, 10, 40], dtype=float) * dict1["<pad>"]
+    tes_txt_sc = np.zeros([tes_num, 10], dtype=float)
+    tes_scores_pad = np.zeros([tes_num,10,10], dtype=float)
+
+    ins_ind = 0
+    for date_ind in range(tes_ind, len(trading_dates)):
+        # filter out instances without length enough history
+        if date_ind < seq:
+            continue
+        for tic_ind in range(len(fnames)):
+            if data_EOD[tic_ind][date_ind - seq: date_ind, :].min() > -123320:
+                tes_dt[ins_ind, 0] = date_ind
+                tes_tn[ins_ind, 0] = tic_ind
+                tes_pv[ins_ind] = data_EOD[tic_ind][date_ind - seq: date_ind, :-2]
+                # # for the momentum indicator
+                # tes_pv[ins_ind, -1, -1] = data_EOD[tic_ind][date_ind - 1, -1] - data_EOD[tic_ind][date_ind - 11, -1]
+                tes_wd[ins_ind] = data_wd[date_ind - seq: date_ind, :]
+                if abs(data_EOD[tic_ind][date_ind][-2]) > 1e-8:
+                    tes_lb[ins_ind, 0] = 1
+                    tes_gt[ins_ind, 0] = (data_EOD[tic_ind][date_ind][-2] + 1) / 2
+                    if date_ind in all_text[tic_ind]:
+                        tes_txt[ins_ind] = np.array(all_text[tic_ind][date_ind],dtype=float)
+                        tes_txt_sc[ins_ind] = all_text_score[tic_ind][date_ind]
+                        tes_scores_pad[ins_ind] = all_pad_score[tic_ind][date_ind]
+                    else:
+                        tes_txt[ins_ind] = np.ones((10,40),dtype=float) * dict1["<pad>"]
+                        tes_txt_sc[ins_ind] = np.zeros(10,dtype=float)
+                        tes_scores_pad[ins_ind] = np.ones((10,10),dtype=float) * 0
+
+                else:
+                    tes_gt[ins_ind, 0] = 2
+                ins_ind += 1
+    return tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_lb, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_lb, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_lb, tes_txt, tes_txt_sc, tes_scores_pad
 
 data_period = {
     "kdd17": {
@@ -827,30 +1106,30 @@ window = 5
 path = "/home/zhaokx/formal_from_autodl/finance_stock_datasets"
 datasets = ["kdd17","ni225","ftse100","csi300"]
 datasets = ["CMIN-US","CMIN-CN"]
-datasets = ["stocknet"] 
+# datasets = ["stocknet"] 
 for dir1 in datasets:
     if dir1.startswith("CMIN"):
         path1 = os.path.join(path, dir1)
-        tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_txt, tes_txt_sc, tes_scores_pad = load_cmin_data(
+        tra_pv, tra_gt, tra_wd, tra_dt, tra_tn,tra_lb, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_lb, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_lb, tes_txt, tes_txt_sc, tes_scores_pad = load_cmin_data(
             path1,
             data_period[dir1]["train_start"], data_period[dir1]["val_start"], data_period[dir1]["test_start"],seq=window, dict = data_period[dir1]["dict"]
         )
-        np.savez_compressed(dir1+'_data.npz',  tra_pv=tra_pv, tra_gt=tra_gt, tra_wd=tra_wd, tra_dt=tra_dt, tra_co=tra_tn, tra_txt=tra_txt, tra_txt_sc=tra_txt_sc, tra_scores_pad=tra_scores_pad, val_pv=val_pv, val_gt=val_gt, val_wd=val_wd, val_dt=val_dt, val_co=val_tn, val_txt=val_txt, val_txt_sc=val_txt_sc, val_scores_pad=val_scores_pad, tes_pv=tes_pv, tes_gt=tes_gt, tes_wd=tes_wd, tes_dt=tes_dt, tes_co=tes_tn, tes_txt=tes_txt, tes_txt_sc=tes_txt_sc, tes_scores_pad=tes_scores_pad
+        np.savez_compressed(dir1+'_data.npz',  tra_pv=tra_pv, tra_gt=tra_gt, tra_wd=tra_wd, tra_dt=tra_dt, tra_co=tra_tn, tra_lb=tra_lb, tra_txt=tra_txt, tra_txt_sc=tra_txt_sc, tra_scores_pad=tra_scores_pad, val_pv=val_pv, val_gt=val_gt, val_wd=val_wd, val_dt=val_dt, val_co=val_tn, val_lb=val_lb, val_txt=val_txt, val_txt_sc=val_txt_sc, val_scores_pad=val_scores_pad, tes_pv=tes_pv, tes_gt=tes_gt, tes_wd=tes_wd, tes_dt=tes_dt, tes_co=tes_tn, tes_lb=tes_lb, tes_txt=tes_txt, tes_txt_sc=tes_txt_sc, tes_scores_pad=tes_scores_pad
         )
     elif dir1 != "stocknet": 
         path1 = os.path.join(path,dir1,"ourpped")
-        tra_pv, tra_wd, tra_gt, val_pv, val_wd, val_gt, tes_pv, tes_wd, tes_gt = load_time_data(
+        tra_pv, tra_wd, tra_gt, val_pv, val_wd, val_gt, tes_pv, tes_wd, tes_gt, tra_dt, val_dt, tes_dt, tra_tn, val_tn, tes_tn, tra_lb, val_lb, tes_lb = load_time_data(
             path1,
             data_period[dir1]["train_start"], data_period[dir1]["val_start"], data_period[dir1]["test_start"],seq=window
         )
-        np.savez_compressed(dir1+'_data.npz', tes_pv=tes_pv,tes_wd=tes_wd,tes_gt=tes_gt, tra_pv=tra_pv, tra_wd=tra_wd, tra_gt=tra_gt,val_pv=val_pv, val_gt=val_gt, val_wd = val_wd
+        np.savez_compressed(dir1+'_data.npz', tes_pv=tes_pv,tes_wd=tes_wd,tes_gt=tes_gt, tra_pv=tra_pv, tra_wd=tra_wd, tra_gt=tra_gt,val_pv=val_pv, val_gt=val_gt, val_wd = val_wd, tra_dt = tra_dt, val_dt = val_dt, tes_dt = tes_dt, tra_tn = tra_tn, val_tn = val_tn, tes_tn = tes_tn, tra_lb=tra_lb, val_lb=val_lb, tes_lb=tes_lb
         )
     else:
         path1 = os.path.join(path,dir1)
-        tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_txt, tes_txt_sc, tes_scores_pad = load_stocknet_data(
+        tra_pv, tra_gt, tra_wd, tra_dt, tra_tn, tra_lb, tra_txt, tra_txt_sc, tra_scores_pad, val_pv, val_gt, val_wd, val_dt, val_tn, val_lb, val_txt, val_txt_sc, val_scores_pad, tes_pv, tes_gt, tes_wd, tes_dt, tes_tn, tes_lb, tes_txt, tes_txt_sc, tes_scores_pad = load_stocknet_data2(
             path1,
             data_period[dir1]["train_start"], data_period[dir1]["val_start"], data_period[dir1]["test_start"],seq=window,  dict = data_period[dir1]["dict"]
         )
-        np.savez_compressed(dir1+'_data.npz', tra_pv=tra_pv, tra_gt=tra_gt, tra_wd=tra_wd, tra_dt=tra_dt, tra_co=tra_tn, tra_txt=tra_txt, tra_txt_sc=tra_txt_sc, tra_scores_pad=tra_scores_pad, val_pv=val_pv, val_gt=val_gt, val_wd=val_wd, val_dt=val_dt, val_co=val_tn, val_txt=val_txt, val_txt_sc=val_txt_sc, val_scores_pad=val_scores_pad, tes_pv=tes_pv, tes_gt=tes_gt, tes_wd=tes_wd, tes_dt=tes_dt, tes_co=tes_tn, tes_txt=tes_txt, tes_txt_sc=tes_txt_sc, tes_scores_pad=tes_scores_pad
+        np.savez_compressed(dir1+'_data.npz', tra_pv=tra_pv, tra_gt=tra_gt, tra_wd=tra_wd, tra_dt=tra_dt, tra_co=tra_tn, tra_lb=tra_lb, tra_txt=tra_txt, tra_txt_sc=tra_txt_sc, tra_scores_pad=tra_scores_pad, val_pv=val_pv, val_gt=val_gt, val_wd=val_wd, val_dt=val_dt, val_co=val_tn, val_lb=val_lb, val_txt=val_txt, val_txt_sc=val_txt_sc, val_scores_pad=val_scores_pad, tes_pv=tes_pv, tes_gt=tes_gt, tes_wd=tes_wd, tes_dt=tes_dt, tes_co=tes_tn, tes_lb=tes_lb, tes_txt=tes_txt, tes_txt_sc=tes_txt_sc, tes_scores_pad=tes_scores_pad
         )
        
